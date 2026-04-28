@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wahlverfahren - Projektzuweisung</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <ul class="nav-links">
+            <li><a href="#home" class="active" data-page="home">Home</a></li>
+            <li><a href="#anleitung" data-page="anleitung">Anleitung</a></li>
+        </ul>
+    </nav>
+
+    <section id="home" class="page active">
+        <div class="hero">
+            <h1>Projektzuweisung</h1>
+            <p>Wählen Sie ein Verfahren und laden Sie Ihre Daten hoch</p>
+        </div>
+
+        <div class="main-window">
+            <div class="algorithm-selector">
+                <div class="badge-toggle">
+                    <button id="btn-spz" class="active">SPZ <span class="badge">Empfohlen</span></button>
+                    <button id="btn-io">ILP <span class="badge">Bald</span></button>
+                </div>
+            </div>
+
+            <div class="algorithm-info" id="spz-info">
+                <p><strong>SPZ</strong> - Stochastisches Probabilistisches Verfahren. Ein randomisierter Algorithmus, der die Wahrscheinlichkeiten basierend auf den abgegebenen Stimmen verwendet.</p>
+            </div>
+
+            <div class="algorithm-info hidden" id="io-info">
+                <p><strong>ILP</strong> - Ganzzahlige Optimierung. Ein deterministischer Algorithmus, der die bestmögliche Zuordnung mathematisch berechnet.</p>
+            </div>
+
+            <div class="upload-section">
+                <h3>Dateien hochladen</h3>
+                <div class="upload-grid">
+                    <div class="upload-box">
+                        <label for="projectFile">
+                            <span class="upload-icon">📁</span>
+                            <span class="upload-text" id="projectFileName">Projekt-Kapazitäten</span>
+                            <span class="upload-hint">.csv</span>
+                        </label>
+                        <input type="file" id="projectFile" accept=".csv">
+                    </div>
+                    <div class="upload-box">
+                        <label for="studentFile">
+                            <span class="upload-icon">📁</span>
+                            <span class="upload-text" id="studentFileName">Schüler-Wahlen</span>
+                            <span class="upload-hint">.csv</span>
+                        </label>
+                        <input type="file" id="studentFile" accept=".csv">
+                    </div>
+                    <div class="upload-box disabled" title="Diese Funktion folgt in Kürze">
+                        <label>
+                            <span class="upload-icon">📁</span>
+                            <span class="upload-text">Weitere Datei</span>
+                            <span class="upload-hint">.csv (bald)</span>
+                        </label>
+                        <input type="file" accept=".csv" disabled>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <button id="runButton" class="btn-primary" disabled>
+                    <span class="btn-text">Auswerten</span>
+                    <span class="btn-loader"></span>
+                </button>
+            </div>
+
+            <div id="progressSection" class="progress-section hidden">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <p class="progress-text" id="progressText">Berechne...</p>
+            </div>
+
+            <div id="resultSection" class="result-section hidden">
+                <div class="result-summary">
+                    <h3>Ergebnis</h3>
+                    <p id="resultMessage"></p>
+                </div>
+                <button id="downloadButton" class="btn-secondary">
+                    <span>📥 CSV herunterladen</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section id="anleitung" class="page">
+        <div class="anleitung-content">
+            <h1>Anleitung</h1>
+            <p class="projekt-info">Finian Markwardt<br>Jugendforscht 2026</p>
+
+            <hr>
+
+            <h1>SPZ - Stochastisches Probabilistisches Verfahren</h1>
+
+            <div class="anleitung-section">
+                <h2>1. Funktionsweise</h2>
+                <p>Das SPZ ist eine Variante des Gale-Shapley-Algorithmus. Der Ablauf:</p>
+                <ol>
+                    <li><strong>Normalisierung:</strong> Für jeden Schüler werden die Stimmen so skaliert, dass ihre Summe 1 ergibt. Aus 10, 6, 3 wird also 0,526, 0,316, 0,158.</li>
+                    <li><strong>Projektauswahl:</strong> In jeder Runde wird das Projekt mit den meisten verbleibenden Stimmen ausgewählt.</li>
+                    <li><strong>Zuordnung:</strong> Per Zufall wird ein Schüler aus diesem Projekt ausgewählt, basierend auf den normalisierten Werten, wer dabei einen höheren Wert hat erhält größere Chancen, den Platz zu erhalten .</li>
+                    <li><strong>Vergleich:</strong> Wenn der ausgewählte Schüler bereits ein Projekt hat, wird geprüft, ob das neue Projekt besser ist. Falls ja, findet ein Tausch statt.</li>
+                    <li><strong>Wiederholung:</strong> Der Vorgang wiederholt sich, bis alle Schüler zugeordnet sind oder keine freien Plätze mehr verfügbar sind.</li>
+                </ol>
+                <p><strong>Charakteristik:</strong> Stochastisch - bei mehreren Durchläufen können unterschiedliche Ergebnisse entstehen.</p>
+            </div>
+
+            <div class="anleitung-section">
+                <h2>2. Anwendungssituationen</h2>
+                <p>Das SPZ eignet sich besonders für:</p>
+                <ul>
+                    <li>Fälle, in denen eine ausgewogene Verteilung erwünscht ist</li>
+                    <li>Situationen, in denen kein Projekt priorisiert werden soll</li>
+                    <li>Mehrere unabhängige Durchläufe mit unterschiedlichen Ergebnissen</li>
+                    <li>Wenn die Zufallskomponente erwünscht ist</li>
+                </ul>
+            </div>
+
+            <div class="anleitung-section">
+                <h2>3. Datenstruktur der Eingaben</h2>
+                <p>Das SPZ erwartet zwei CSV-Dateien:</p>
+                
+                <div class="csv-example">
+                    <h4>Projekt-Kapazitäten (projekt.csv)</h4>
+                    <pre>Projekt,Kapazitaet
+Projekt A,35
+Projekt B,28
+Projekt C,21
+...</pre>
+                    <p class="hint"><strong>Spalten:</strong> Projektname, Kapazität (Anzahl verfügbarer Plätze)</p>
+                    <p class="hint"><strong>Hinweis:</strong> Projektnamen dürfen Kommas enthalten - diese werden korrekt verarbeitet.</p>
+                </div>
+                
+                <div class="csv-example">
+                    <h4>Schüler-Wahlen (schueler.csv)</h4>
+                    <pre>Vorname,Nachname,class,Projekt A,Projekt B,Projekt C,...
+Max,Mustermann,7a,10,0,0,1,0,0,...
+Anna,Schmidt,7b,5,6,0,0,0,0,...
+...</pre>
+                    <p class="hint"><strong>Spalten:</strong> Vorname, Nachname, Klasse, dann für jedes Projekt eine Spalte mit der Stimmenanzahl</p>
+                </div>
+            </div>
+
+            <div class="anleitung-section">
+                <h2>4. Verwendungsanleitung</h2>
+                <p>So verwenden Sie das SPZ:</p>
+                <ol>
+                    <li>Stellen Sie sicher, dass keine Felder leer sind, sondern mindestens eine 0 enthalten</li>
+                    <li>Laden Sie die Projekt-Kapazitäten-Datei hoch</li>
+                    <li>Laden Sie die Schüler-Wahlen-Datei hoch</li>
+                    <li>Klicken Sie auf "Auswerten"</li>
+                    <li>Die CSV-Datei wird automatisch heruntergeladen</li>
+                </ol>
+                <p><strong>Tipp:</strong> Öffnen Sie die Browser-Konsole (F12) für detaillierte Analyseergebnisse.</p>
+            </div>
+
+            <hr>
+
+            <h1>ILP - Ganzzahlige Optimierung</h1>
+
+            <div class="anleitung-section">
+                <h2>1. Funktionsweise</h2>
+                <p>Das ILP-Verfahren verwendet mathematische Optimierung, um die bestmögliche Zuordnung zu finden:</p>
+                <ol>
+                    <li><strong>Modellierung:</strong> Das Problem wird als Ganzzahlige Lineare Optimierung (ILP) formuliert.</li>
+                    <li><strong>Zielfunktion:</strong> Maximierung der Gesamtzufriedenheit basierend auf den Präferenzen.</li>
+                    <li><strong>Randbedingungen:</strong> Jeder Schüler erhält maximal ein Projekt; jedes Projekt hat eine maximale Kapazität.</li>
+                    <li><strong>Lösung:</strong> Ein Solver berechnet die optimale Zuordnung.</li>
+                </ol>
+                <p><strong>Charakteristik:</strong> Deterministisch - bei gleichen Eingabedaten kommt immer das gleiche Ergebnis.</p>
+                
+                <div class="info-note">
+                    <strong>Bald verfügbar:</strong> Dieses Verfahren wird in Kürze implementiert sein.
+                </div>
+            </div>
+
+            <div class="anleitung-section">
+                <h2>2. Anwendungssituationen</h2>
+                <p>Das ILP-Verfahren eignet sich besonders für:</p>
+                <ul>
+                    <li>Konsistente Ergebnisse bei wiederholten Durchläufen</li>
+                    <li>Maximierung der Gesamtzufriedenheit</li>
+                    <li>Fälle, in denen Reproduzierbarkeit wichtig ist</li>
+                    <li>Wenn die bestmögliche Lösung garantiert werden soll</li>
+                </ul>
+            </div>
+
+            <div class="anleitung-section">
+                <h2>3. Datenstruktur der Eingaben</h2>
+                <p>Das ILP-Verfahren erwartet zwei CSV-Dateien:</p>
+                
+                <div class="csv-example">
+                    <h4>Projekt-Kapazitäten (projekt.csv)</h4>
+                    <pre>Projekt,Kapazitaet
+Projekt A,35
+Projekt B,28
+Projekt C,21
+...</pre>
+                    <p class="hint"><strong>Spalten:</strong> Projektname, Kapazität (Anzahl verfügbarer Plätze)</p>
+                </div>
+                
+                <div class="csv-example">
+                    <h4>Schüler-Wahlen (schueler.csv)</h4>
+                    <pre>Vorname,Nachname,class,Projekt A,Projekt B,Projekt C,...
+Max,Mustermann,7a,1,2,3,0,0,0,...
+Anna,Schmidt,7b,2,1,3,0,0,0,...
+...</pre>
+                    <p class="hint"><strong>Spalten:</strong> Vorname, Nachname, Klasse, dann für jedes Projekt eine Spalte mit der Wunschnummer</p>
+                    <p class="hint"><strong>Wertesystem:</strong> 1 = Erstwunsch, 2 = Zweitwunsch, 3 = Drittwunsch, 0 = keine Präferenz</p>
+                    <p class="hint"><strong>Wichtig:</strong> Jeder Schüler hat genau eine 1, eine 2 und eine 3 in seiner Zeile (oder 0 wenn kein Wunsch)</p>
+                </div>
+            </div>
+
+            <div class="anleitung-section">
+                <h2>4. Verwendungsanleitung</h2>
+                <p>So verwenden Sie das ILP-Verfahren:</p>
+                <ol>
+                    <li>Stellen Sie sicher, dass beide CSV-Dateien im UTF-8 Format vorliegen</li>
+                    <li>Die Schüler-Wahlen-Datei verwendet das Wertesystem 1, 2, 3 statt 10, 6, 3</li>
+                    <li>Laden Sie die Projekt-Kapazitäten-Datei hoch</li>
+                    <li>Laden Sie die Schüler-Wahlen-Datei hoch</li>
+                    <li>Klicken Sie auf "Auswerten"</li>
+                    <li>Die CSV-Datei wird automatisch heruntergeladen</li>
+                </ol>
+            </div>
+
+            <hr>
+
+
+            <h1>Tipps</h1>
+
+            <div class="anleitung-section">
+                <ul>
+                    <li>Stellen Sie sicher, dass genügend Gesamtkapazität vorhanden ist für alle Schüler</li>
+                    <li>Bei sehr beliebten Projekten kann es sein, dass nicht alle Erstwünsche erfüllt werden können</li>
+                    <li>Öffnen Sie die Browser-Konsole (F12) für detaillierte Analyseergebnisse</li>
+                    <li>Für SPZ verwenden Sie das Punktesystem, Punkte spiegeln Präferenzen dar, für den ILP Algorithmus brauchen sie reguläre Erst-, Zweit-, und Drittwünsche (1, 2, 3)</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>2026 Entwicklung eines gerechten Zuteilungsverfahren.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
