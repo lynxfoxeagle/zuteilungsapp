@@ -2,6 +2,7 @@ const STATE = {
     algorithm: 'SPZ',
     projectFile: null,
     studentFile: null,
+    historyFile: null,
     projects: [],
     students: [],
     result: null
@@ -10,8 +11,10 @@ const STATE = {
 const elements = {
     projectFile: document.getElementById('projectFile'),
     studentFile: document.getElementById('studentFile'),
+    historyFile: document.getElementById('historyFile'),
     projectFileName: document.getElementById('projectFileName'),
     studentFileName: document.getElementById('studentFileName'),
+    historyFileName: document.getElementById('historyFileName'),
     runButton: document.getElementById('runButton'),
     progressSection: document.getElementById('progressSection'),
     progressFill: document.getElementById('progressFill'),
@@ -26,30 +29,14 @@ const elements = {
 };
 
 function init() {
-    setupNavigation();
     setupFileUploads();
     setupAlgorithmToggle();
-}
-
-function setupNavigation() {
-    document.querySelectorAll('.nav-links a').forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const page = link.dataset.page;
-            
-            document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-            
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(page).classList.add('active');
-        });
-    });
 }
 
 function setupAlgorithmToggle() {
     function setAlgorithm(algo) {
         STATE.algorithm = algo;
-        
+
         if (algo === 'SPZ') {
             elements.btnSpz.classList.add('active');
             elements.btnIo.classList.remove('active');
@@ -70,8 +57,9 @@ function setupAlgorithmToggle() {
 function setupFileUploads() {
     elements.projectFile.addEventListener('change', (e) => handleFileUpload(e, 'project'));
     elements.studentFile.addEventListener('change', (e) => handleFileUpload(e, 'student'));
+    elements.historyFile.addEventListener('change', (e) => handleFileUpload(e, 'history'));
     elements.runButton.addEventListener('click', () => {
-        if (STATE.projectFile && STATE.studentFile) {
+        if (STATE.projectFile && STATE.studentFile && STATE.historyFile) {
             run_assignment();
         } else {
             alert('Bitte beide Dateien hochladen.');
@@ -80,7 +68,7 @@ function setupFileUploads() {
 }
 
 function updateRunButton() {
-    if (STATE.projectFile && STATE.studentFile) {
+    if (STATE.projectFile && STATE.studentFile && STATE.historyFile) {
         elements.runButton.removeAttribute('disabled');
     } else {
         elements.runButton.setAttribute('disabled', 'true');
@@ -90,7 +78,6 @@ function updateRunButton() {
 function handleFileUpload(event, type) {
     const file = event.target.files[0];
     if (!file) return;
-    
     const reader = new FileReader();
     reader.onload = (e) => {
         const content = e.target.result;
@@ -100,24 +87,31 @@ function handleFileUpload(event, type) {
                 STATE.projects = parseProjectsCSV(content);
                 elements.projectFileName.parentElement.parentElement.classList.add('has-file');
                 elements.projectFileName.textContent = file.name;
-            } else {
+            } else if (type === 'student') {
                 STATE.studentFile = true;
-                STATE.students = parseStudentsCSV(content);
+                STATE.students = parseStudentsCSV(content, STATE.rawHistoryCSV);
                 elements.studentFileName.parentElement.parentElement.classList.add('has-file');
                 elements.studentFileName.textContent = file.name;
+            } else if (type === 'history') {
+                STATE.historyFile = true;
+                STATE.rawHistoryCSV = content;
+
+                elements.historyFileName.parentElement.parentElement.classList.add('has-file');
+                elements.historyFileName.textContent = file.name;
             }
             updateRunButton();
         } catch (err) {
-            alert(`Fehler beim Parsen der ${type === 'project' ? 'Projekt' : 'Schüler'}-Datei: ${err.message}`);
+            alert(`Fehler beim Parsen der ${type}-Datei: ${err.message}`);
         }
     };
     reader.readAsText(file, 'UTF-8');
 }
+``
 
 function parseProjectsCSV(content) {
     const lines = content.trim().split(/\r?\n/).filter(line => line.trim());
     const projectList = [];
-    
+
     for (let i = 1; i < lines.length; i++) {
         const parts = lines[i].split(',');
         if (parts.length < 2) continue;
@@ -141,24 +135,25 @@ function parseProjectsCSV(content) {
 function parseStudentsCSV(content) {
     const lines = content.trim().split(/\r?\n/).filter(line => line.trim());
     if (lines.length < 2) throw new Error('Datei enthält keine Daten');
-    
+
     const header = lines[0].split(',');
     const studentList = [];
     const numProjects = STATE.projects.length;
-    
+
     for (let i = 1; i < lines.length; i++) {
         const cols = lines[i].split(',');
         if (cols.length < 4) continue;
-        
+
         const student = {
             'id': studentList.length,
             'name': `${cols[0]?.trim() || ''} ${cols[1]?.trim() || ''}`,
             'assignedProject': None,
             'assignedPrjPriority': 0,
             'votes': [],
-            'class': cols[2]?.trim() || ''
+            'class': cols[2]?.trim() || '',
+            'previousProjects': [{project: ''}],
         };
-        
+
         for (let j = 0; j < numProjects; j++) {
             const projectName = STATE.projects[j]['name'];
             const voteIndex = header.indexOf(projectName);
@@ -171,6 +166,43 @@ function parseStudentsCSV(content) {
 
     return studentList;
 }
+/*
+    function parseStudentsCSV(content) {
+        const lines = content.trim().split(/\r?\n/).filter(line => line.trim());
+        if (lines.length < 2) throw new Error('Datei enthält keine Daten');
+
+        const header = lines[0].split(',');
+        const studentList = [];
+        const numProjects = STATE.projects.length;
+
+        for (let i = 1; i < lines.length; i++) {
+            const cols = lines[i].split(',');
+            if (cols.length < 4) continue;
+
+            const student = {
+                'id': studentList.length,
+                'name': `${cols[0]?.trim() || ''} ${cols[1]?.trim() || ''}`,
+                'assignedProject': None,
+                'assignedPrjPriority': 0,
+                'votes': [],
+                'class': cols[2]?.trim() || '',
+                'previousProjects': [{project: ''}],
+            };
+
+            for (let j = 0; j < numProjects; j++) {
+                const projectName = STATE.projects[j]['name'];
+                const voteIndex = header.indexOf(projectName);
+                const vote = voteIndex >= 0 ? parseInt(cols[voteIndex]?.trim() || '0', 10) : 0;
+                student['votes'].push(isNaN(vote) ? 0 : vote);
+            }
+            studentList.push(student);
+        }
+        console.log('studentList @@>> ', studentList)
+
+        return studentList;
+    }
+
+ */
 
 function run_assignment() {
     if (STATE.algorithm === 'IO') {
@@ -180,7 +212,7 @@ function run_assignment() {
 
     const projectList = STATE.projects;
     const studentList = STATE.students;
-    
+
     const notAssignedProjectIndex = projectList.length;
     projectList.push({
         'name': 'Nicht zugeteilt',
@@ -191,9 +223,9 @@ function run_assignment() {
         'noVotes': 0,
         'votes': []
     });
-    
+
     // ------------------ Algorithmus ------------------
-    
+
     function normalize() {
         for (const student of studentList) {
             const voteSum = student['votes'].reduce((a, b) => a + b, 0);
@@ -263,7 +295,6 @@ function run_assignment() {
         projectList[maxProject['id']]['votes'].splice(i, 1);
     }
 
-    // ------------------ Ergebnis speichern ------------------
     let valueAllocation = 0;
     for (const student of studentList) {
         if (student['assignedProject'] !== null) {
@@ -304,7 +335,7 @@ function run_assignment() {
     const csvContent = csvRows.map(row => row.join(',')).join('\n');
     console.log(csvContent);
 
-    // ------------------ Auswertung ------------------
+
     let countNotAssigned = 0;
     let countFirstChoice = 0;
     for (const student of studentList) {
@@ -343,7 +374,91 @@ function run_assignment() {
     downloadLink.click();
     URL.revokeObjectURL(url);
 
+
+
+    downloadCSV(STATE.studentList);
     return notAssignedProjectIndex;
+
+}
+
+function downloadCSV(studentList) {
+    const headers = ["ID", "Name", "Class"];
+
+    let maxProjects = 0;
+
+    // Hilfsfunktion: nur echte Projekte behalten
+    function getCleanHistory(student) {
+        let history = (student.previousProjects || [])
+            .filter(p => p && (p.project)); // leere Einträge entfernen
+
+        // Falls ein Projekt zugewiesen ist
+        if (student.assignedProject) {
+            // 👉 Wenn KEINE Historie existiert → erste Zuteilung
+            if (history.length === 0) {
+                history = [{
+                    date: new Date().toISOString().split("T")[0],
+                    project: student.assignedProject
+                }];
+            } else {
+                // 👉 sonst als neuestes anhängen
+                history.push({
+                    date: new Date().toISOString().split("T")[0],
+                    project: student.assignedProject
+                });
+            }
+        }
+
+        return history;
+    }
+
+    // Max Projekteinträge bestimmen
+    studentList.forEach(student => {
+        const history = getCleanHistory(student);
+        if (history.length > maxProjects) {
+            maxProjects = history.length;
+        }
+    });
+
+    // Header erweitern
+    for (let i = 1; i <= maxProjects; i++) {
+        headers.push(`Project_${i}_Name`);
+    }
+
+    const rows = [headers];
+
+    // Daten erzeugen
+    studentList.forEach(student => {
+        const row = [
+            student.id,
+            student.name,
+            student.class
+        ];
+
+        const history = getCleanHistory(student);
+
+        history.forEach(entry => {
+            row.push(entry.project || "");
+        });
+
+        // Auffüllen
+        while (row.length < headers.length) {
+            row.push("");
+        }
+
+        rows.push(row);
+    });
+
+    const csvContent = rows.map(r => r.join(";")).join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "students.csv";
+    a.click();
+
+    URL.revokeObjectURL(url);
 }
 
 const None = null;
