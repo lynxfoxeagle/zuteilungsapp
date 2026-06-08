@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Projektzuweisung</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+    <ul class="navigation-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="index_sort.html">Zuteilung</a></li>
+        <li><a href="index_neu.html">Anleitung</a></li>
+    </ul>
+</nav>
+
+    <section id="home" class="page active">
+        <div class="box">
+            <h1 style="font-size:2.5rem;font-weight:300;margin-bottom:1rem">Projektzuweisung</h1>
+        </div>
+
+        <div class="box" style="margin-bottom:4rem; background:#fff;border:1px solid #ddd;border-radius:12px">
+                <h1 class="heading">SPZ</h1>
+
+            <div id="spz-info" class="box">
+                <p class="text"><strong>SPZ-Verfahren</strong> - Stochastisches Probabilistisches Verfahren. Ein randomisierter Algorithmus, der die Wahrscheinlichkeiten basierend auf den abgegebenen Stimmen verwendet.</p>
+            </div>
+
+            <div>
+                <h3>Dateien hochladen</h3>
+                <div class="upload-grid">
+                    <div class="upload-box">
+                        <label for="projectFile">
+                            <span class="upload-icon">📁</span>
+                            <span class="text" id="projectFileName">Projekt-Kapazitäten</span>
+                            <span class="upload-hint">.csv</span>
+                        </label>
+                        <input type="file" id="projectFile" accept=".csv">
+                    </div>
+                    <div class="upload-box">
+                        <label for="studentFile">
+                            <span class="upload-icon">📁</span>
+                            <span class="text" id="studentFileName">Schüler-Wahlen</span>
+                            <span class="upload-hint">.csv</span>
+                        </label>
+                        <input type="file" id="studentFile" accept=".csv">
+                    </div>
+                </div>
+            </div>
+
+            <div class="box">
+                <button id="runButton" class="btn-primary" disabled>
+                    <span class="text">Auswerten</span>
+                </button>
+            </div>
+
+        </div>
+    </section>
+
+    <footer>
+        <p>2026 Entwicklung eines gerechten Zuteilungsverfahren.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
